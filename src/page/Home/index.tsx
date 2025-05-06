@@ -1,10 +1,24 @@
+import React, {useEffect, useState} from 'react';
 import {StyleSheet, View, TouchableOpacity, Text} from 'react-native';
-import React, {useState} from 'react';
 import {Gap, Quotes, AddButton} from '../../components/atoms';
 import {Header, Category, NotesList} from '../../components/molecules';
 import {SearchIcon} from '../../assets';
+import {getDatabase, ref, onValue} from 'firebase/database';
 
-const Home = ({notes, onFavorite, handleAddNote, navigation}) => {
+const Home = ({notes, onFavorite, handleAddNote, navigation, route}) => {
+  const {uid} = route.params;
+  const [fullName, setFullName] = useState('');
+  // const [photo, setPhoto] = useState(NullPhoto);
+
+  useEffect(() => {
+    const db = getDatabase();
+    const userRef = ref(db, 'users/' + uid);
+    onValue(userRef, snapshot => {
+      const data = snapshot.val();
+      setFullName(data.fullName);
+      // setPhoto({uri: data.photo});
+    });
+  }, []);
   const [activeCategory, setActiveCategory] = useState('All');
   const allNotes = [...notes].sort((a, b) => b.createdAt - a.createdAt);
   const filteredNotes = allNotes.filter(note => {
@@ -18,7 +32,12 @@ const Home = ({notes, onFavorite, handleAddNote, navigation}) => {
   });
   return (
     <View style={styles.pageContainer}>
-      <Header title="Welcome Deeva!" titleSize={30} rightImage align="left" />
+      <Header
+        title={`Welcome, ${fullName}`}
+        titleSize={30}
+        rightImage
+        align="left"
+      />
       <View style={styles.contentContainer}>
         <Quotes />
         <Gap height={22} />
