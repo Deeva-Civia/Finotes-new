@@ -1,0 +1,88 @@
+import {StyleSheet, View, TouchableOpacity, Text} from 'react-native';
+import React, {useState} from 'react';
+import {Gap, Quotes, AddButton} from '../../components/atoms';
+import {Header, Category, NotesList} from '../../components/molecules';
+import {SearchIcon} from '../../assets';
+
+const Home = ({notes, onFavorite, handleAddNote, navigation}) => {
+  const [activeCategory, setActiveCategory] = useState('All');
+  const allNotes = [...notes].sort((a, b) => b.createdAt - a.createdAt);
+  const filteredNotes = allNotes.filter(note => {
+    if (activeCategory === 'All') {
+      return true;
+    }
+    if (activeCategory === 'Favorite') {
+      return note.favorited;
+    }
+    return note.category === activeCategory;
+  });
+  return (
+    <View style={styles.pageContainer}>
+      <Header title="Welcome Deeva!" titleSize={30} rightImage align="left" />
+      <View style={styles.contentContainer}>
+        <Quotes />
+        <Gap height={22} />
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Search')}
+          style={styles.searchFakeInput}
+          activeOpacity={0.9}>
+          <SearchIcon style={styles.icon} />
+          <Text style={styles.placeholder}>Search</Text>
+        </TouchableOpacity>
+        <Gap height={22} />
+        <Category
+          activeCategory={activeCategory}
+          setActiveCategory={category => {
+            setActiveCategory(category);
+          }}
+        />
+        <Gap height={19} />
+        <NotesList
+          notes={filteredNotes}
+          onFavorite={onFavorite}
+          text={
+            '\t\t\t\t\tNo notes available\nStart by creating your first one!'
+          }
+          onPressItem={note => navigation.navigate('EditNote', {note})}
+        />
+        <AddButton onPress={() => navigation.navigate('AddNote')} />
+      </View>
+    </View>
+  );
+};
+
+export default Home;
+
+const styles = StyleSheet.create({
+  pageContainer: {
+    flex: 1,
+    backgroundColor: '#EDF3FF',
+  },
+  contentContainer: {
+    flex: 1,
+    paddingHorizontal: 15,
+    marginTop: 27,
+  },
+  searchFakeInput: {
+    backgroundColor: '#F6F6F6',
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 40,
+    gap: 10,
+    paddingHorizontal: 10,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#AEAEAE',
+  },
+  placeholder: {
+    flex: 1,
+    fontSize: 15,
+    color: '#AEAEAE',
+    fontFamily: 'Roboto-Medium',
+    paddingVertical: 0,
+  },
+  icon: {
+    width: 20,
+    height: 20,
+  },
+});
