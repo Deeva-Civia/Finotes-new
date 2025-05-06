@@ -2,7 +2,8 @@ import React, {useEffect, useState} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 import {Header, TextInput} from '../../components/molecules';
 import {Button, Gap} from '../../components/atoms/';
-import {getAuth, signInWithEmailAndPassword} from 'firebase/auth';
+import {auth} from '../../config/Firebase';
+import {signInWithEmailAndPassword} from 'firebase/auth';
 import {showMessage} from 'react-native-flash-message';
 
 const SignIn = ({navigation}) => {
@@ -10,7 +11,6 @@ const SignIn = ({navigation}) => {
   const [password, setPassword] = useState('');
 
   const onSubmit = () => {
-    const auth = getAuth();
     signInWithEmailAndPassword(auth, email, password)
       .then(userCredential => {
         // Signed in

@@ -4,21 +4,13 @@ import {Gap, Quotes, AddButton} from '../../components/atoms';
 import {Header, Category, NotesList} from '../../components/molecules';
 import {SearchIcon} from '../../assets';
 import {getDatabase, ref, onValue} from 'firebase/database';
+import {collection, getDocs} from 'firebase/firestore';
+import {firestore} from '../../config/Firebase';
 
-const Home = ({notes, onFavorite, handleAddNote, navigation, route}) => {
-  const {uid} = route.params;
+const Home = ({uid, notes, onFavorite, handleAddNote, navigation, route}) => {
   const [fullName, setFullName] = useState('');
   // const [photo, setPhoto] = useState(NullPhoto);
 
-  useEffect(() => {
-    const db = getDatabase();
-    const userRef = ref(db, 'users/' + uid);
-    onValue(userRef, snapshot => {
-      const data = snapshot.val();
-      setFullName(data.fullName);
-      // setPhoto({uri: data.photo});
-    });
-  }, []);
   const [activeCategory, setActiveCategory] = useState('All');
   const allNotes = [...notes].sort((a, b) => b.createdAt - a.createdAt);
   const filteredNotes = allNotes.filter(note => {

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import SplashScreen from './src/page/SplashScreen';
 import SignIn from './src/page/SignIn';
 import SignUp from './src/page/SignUp';
@@ -11,6 +11,8 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import FlashMessage from 'react-native-flash-message';
 import './src/config/Firebase';
+import {collection, getDocs} from 'firebase/firestore';
+import {auth, firestore} from './src/config/Firebase';
 const Stack = createNativeStackNavigator();
 
 const App = () => {
@@ -52,13 +54,24 @@ const App = () => {
     },
   ]);
 
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const handleAddNote = () => {
-    console.log('Add note pressed');
-    // nanti navigasi ke halaman Add Note
+  const fetchNotes = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(firestore, 'notes'));
+      const fetchedNotes = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setNotes(fetchedNotes);
+    } catch (error) {
+      console.error('Error fetching notes:', error);
+    }
   };
 
+  useEffect(() => {
+    fetchNotes();
+  }, []);
+
+  const [searchQuery, setSearchQuery] = useState('');
   const handleFavorite = id => {
     const updatedNotes = notes.map(note =>
       note.id === id ? {...note, favorited: !note.favorited} : note,
@@ -101,16 +114,23 @@ const App = () => {
           {props => (
             <Home
               {...props}
+              uid={auth.currentUser?.uid}
               notes={notes}
               onFavorite={handleFavorite}
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
-              handleAddNote={handleAddNote}
             />
           )}
         </Stack.Screen>
         <Stack.Screen name="AddNote" options={{headerShown: false}}>
-          {props => <AddNote {...props} notes={notes} setNotes={setNotes} />}
+          {props => (
+            <AddNote
+              {...props}
+              notes={notes}
+              setNotes={setNotes}
+              refreshNotes={fetchNotes}
+            />
+          )}
         </Stack.Screen>
         <Stack.Screen name="EditNote" options={{headerShown: false}}>
           {props => <EditNote {...props} notes={notes} setNotes={setNotes} />}

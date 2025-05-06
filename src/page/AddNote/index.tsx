@@ -11,6 +11,8 @@ import {
   NoteTitleInput,
 } from '../../components/atoms';
 import {CategoryModal} from '../../components/molecules';
+import {collection, addDoc} from 'firebase/firestore';
+import {firestore} from '../../config/Firebase';
 
 const formatDateTime = timestamp => {
   const date = new Date(timestamp);
@@ -27,21 +29,15 @@ const formatDateTime = timestamp => {
   return `${formattedDate} | ${formattedTime}`;
 };
 
-const AddNote = ({navigation, notes, setNotes}) => {
+const AddNote = ({navigation, notes, setNotes, refreshNotes}) => {
   const [selectedCategory, setSelectedCategory] = useState('Select Category');
   const [modalVisible, setModalVisible] = useState(false);
   const [title, setTitle] = useState('');
   const [note, setNote] = useState('');
 
-  const handleSelect = category => {
-    setSelectedCategory(category);
-    setModalVisible(false);
-  };
-
-  const handleSave = () => {
+  const handleSave = async () => {
     const timestamp = Date.now();
     const newNote = {
-      id: timestamp.toString(36),
       title,
       body: note,
       category: selectedCategory,
@@ -49,8 +45,19 @@ const AddNote = ({navigation, notes, setNotes}) => {
       updatedAt: timestamp,
       favorited: false,
     };
-    setNotes([...notes, newNote]);
-    navigation.navigate('Home');
+
+    try {
+      await addDoc(collection(firestore, 'notes'), newNote);
+      await refreshNotes();
+      navigation.navigate('Home');
+    } catch (error) {
+      console.error('Error adding document: ', error);
+    }
+  };
+
+  const handleSelect = category => {
+    setSelectedCategory(category);
+    setModalVisible(false);
   };
 
   return (

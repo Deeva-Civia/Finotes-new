@@ -10,7 +10,8 @@ import {
 import {Header, TextInput} from '../../components/molecules';
 import {Button, Gap} from '../../components/atoms/';
 import {Profile} from '../../assets';
-import {getAuth, createUserWithEmailAndPassword} from 'firebase/auth';
+import {auth} from '../../config/Firebase';
+import {createUserWithEmailAndPassword} from 'firebase/auth';
 // import {launchImageLibrary} from 'react-native-image-picker';
 import {showMessage} from 'react-native-flash-message';
 import {getDatabase, ref, set} from 'firebase/database';
@@ -24,7 +25,6 @@ const SignUp = ({navigation}) => {
   const [password, setPassword] = useState('');
 
   const onSubmit = () => {
-    const auth = getAuth();
     const db = getDatabase();
     createUserWithEmailAndPassword(auth, email, password)
       .then(userCredential => {
