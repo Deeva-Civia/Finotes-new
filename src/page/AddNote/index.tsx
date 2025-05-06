@@ -29,7 +29,7 @@ const formatDateTime = timestamp => {
   return `${formattedDate} | ${formattedTime}`;
 };
 
-const AddNote = ({navigation, notes, setNotes, refreshNotes}) => {
+const AddNote = ({navigation, notes, setNotes}) => {
   const [selectedCategory, setSelectedCategory] = useState('Select Category');
   const [modalVisible, setModalVisible] = useState(false);
   const [title, setTitle] = useState('');
@@ -48,7 +48,6 @@ const AddNote = ({navigation, notes, setNotes, refreshNotes}) => {
 
     try {
       await addDoc(collection(firestore, 'notes'), newNote);
-      await refreshNotes();
       navigation.navigate('Home');
     } catch (error) {
       console.error('Error adding document: ', error);

@@ -4,14 +4,16 @@ import {Gap, Quotes, AddButton} from '../../components/atoms';
 import {Header, Category, NotesList} from '../../components/molecules';
 import {SearchIcon} from '../../assets';
 import {getDatabase, ref, onValue} from 'firebase/database';
-import {collection, getDocs} from 'firebase/firestore';
+import {collection, onSnapshot} from 'firebase/firestore';
 import {firestore} from '../../config/Firebase';
 
-const Home = ({uid, notes, onFavorite, handleAddNote, navigation, route}) => {
+const Home = ({uid, onFavorite, handleAddNote, navigation, route}) => {
   const [fullName, setFullName] = useState('');
   // const [photo, setPhoto] = useState(NullPhoto);
 
   const [activeCategory, setActiveCategory] = useState('All');
+  const [notes, setNotes] = useState([]);
+
   const allNotes = [...notes].sort((a, b) => b.createdAt - a.createdAt);
   const filteredNotes = allNotes.filter(note => {
     if (activeCategory === 'All') {
@@ -22,6 +24,43 @@ const Home = ({uid, notes, onFavorite, handleAddNote, navigation, route}) => {
     }
     return note.category === activeCategory;
   });
+
+  const handleFavorite = async id => {
+    const noteToUpdate = notes.find(note => note.id === id);
+    const updatedNote = {...noteToUpdate, favorited: !noteToUpdate.favorited};
+
+    // Update the note in Firestore
+    const noteRef = doc(firestore, 'notes', id);
+    try {
+      await updateDoc(noteRef, updatedNote);
+      // Update local state after Firestore update
+      const updatedNotes = notes.map(note =>
+        note.id === id ? updatedNote : note,
+      );
+      setNotes(updatedNotes);
+    } catch (error) {
+      console.error('Error updating note favorite status: ', error);
+    }
+  };
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      collection(firestore, 'notes'),
+      snapshot => {
+        const fetchedNotes = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setNotes(fetchedNotes);
+      },
+      error => {
+        console.error('Error fetching notes:', error);
+      },
+    );
+
+    return () => unsubscribe();
+  }, []);
+
   return (
     <View style={styles.pageContainer}>
       <Header

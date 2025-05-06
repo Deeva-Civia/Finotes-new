@@ -12,6 +12,8 @@ import {
   NoteDateText,
   NoteTitleInput,
 } from '../../components/atoms';
+import {doc, updateDoc, deleteDoc} from 'firebase/firestore';
+import {firebase, firestore} from '../../config/Firebase';
 
 const formatDateTime = timestamp => {
   const date = new Date(timestamp);
@@ -41,26 +43,31 @@ const EditNote = ({navigation, route, notes, setNotes}) => {
     setModalVisible(false);
   };
 
-  const handleSave = () => {
-    const updatedNotes = notes.map(n =>
-      n.id === note.id
-        ? {
-            ...n,
-            title,
-            body: description,
-            category: selectedCategory,
-            updatedAt: Date.now(),
-          }
-        : n,
-    );
-    setNotes(updatedNotes);
-    navigation.navigate('Home');
+  const handleSave = async () => {
+    const updatedNote = {
+      title,
+      body: description,
+      category: selectedCategory,
+      updatedAt: Date.now(),
+    };
+
+    try {
+      const noteRef = doc(firestore, 'notes', note.id);
+      await updateDoc(noteRef, updatedNote);
+      navigation.navigate('Home');
+    } catch (error) {
+      console.error('Error updating note: ', error);
+    }
   };
 
-  const handleDelete = () => {
-    const filteredNotes = notes.filter(n => n.id !== note.id);
-    setNotes(filteredNotes);
-    navigation.navigate('Home');
+  const handleDelete = async () => {
+    try {
+      const noteRef = doc(firestore, 'notes', note.id);
+      await deleteDoc(noteRef);
+      navigation.navigate('Home');
+    } catch (error) {
+      console.error('Error deleting note: ', error);
+    }
   };
 
   return (
