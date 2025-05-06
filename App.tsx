@@ -1,118 +1,140 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, {useState} from 'react';
+import SplashScreen from './src/page/SplashScreen';
+import SignIn from './src/page/SignIn';
+import SignUp from './src/page/SignUp';
+import Start from './src/page/Start';
+import Home from './src/page/Home';
+import Search from './src/page/Search';
+import AddNote from './src/page/AddNote';
+import EditNote from './src/page/EditNote';
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import FlashMessage from 'react-native-flash-message';
+import './src/config/Firebase';
+const Stack = createNativeStackNavigator();
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+const App = () => {
+  const [notes, setNotes] = useState([
+    {
+      id: '1',
+      title: 'Rekonfigurasi URL',
+      body: 'Menggunakan file htaccess : sudah tidak pakai index.html',
+      createdAt: new Date('2025-04-15').getTime(),
+      favorited: false,
+      category: 'Back-end',
+    },
+    {
+      id: '2',
+      title: 'Error Handling',
+      body: 'Untuk menangani error dalam javascript menggunakan try',
+      createdAt: new Date('2025-04-14').getTime(),
+      updatedAt: new Date('2025-04-15').getTime(),
+      favorited: true,
+      category: 'Front-end',
+    },
+    {
+      id: '3',
+      title: 'IP & Domain',
+      body: 'IP : 192.168.1.0',
+      createdAt: new Date('2025-04-12').getTime(),
+      updatedAt: new Date('2025-04-15').getTime(),
+      favorited: false,
+      category: 'Back-end',
+    },
+    {
+      id: '4',
+      title: 'Port',
+      body: 'Port 22 : SSH',
+      createdAt: new Date('2025-04-09').getTime(),
+      updatedAt: new Date('2025-04-15').getTime(),
+      favorited: true,
+      category: 'Back-end',
+    },
+  ]);
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+  const [searchQuery, setSearchQuery] = useState('');
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
-
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  const handleAddNote = () => {
+    console.log('Add note pressed');
+    // nanti navigasi ke halaman Add Note
   };
 
+  const handleFavorite = id => {
+    const updatedNotes = notes.map(note =>
+      note.id === id ? {...note, favorited: !note.favorited} : note,
+    );
+    setNotes(updatedNotes);
+  };
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
+    <NavigationContainer>
+      <Stack.Navigator
+        screenOptions={{
+          animation: 'fade',
+        }}>
+        <Stack.Screen
+          name="SplashScreen"
+          component={SplashScreen}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="Start"
+          component={Start}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="SignIn"
+          component={SignIn}
+          options={{
+            headerShown: false,
+            animation: 'slide_from_bottom',
+          }}
+        />
+        <Stack.Screen
+          name="SignUp"
+          component={SignUp}
+          options={{
+            headerShown: false,
+            animation: 'slide_from_bottom',
+          }}
+        />
+        <Stack.Screen name="Home" options={{headerShown: false}}>
+          {props => (
+            <Home
+              {...props}
+              notes={notes}
+              onFavorite={handleFavorite}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              handleAddNote={handleAddNote}
+            />
+          )}
+        </Stack.Screen>
+        <Stack.Screen name="AddNote" options={{headerShown: false}}>
+          {props => <AddNote {...props} notes={notes} setNotes={setNotes} />}
+        </Stack.Screen>
+        <Stack.Screen name="EditNote" options={{headerShown: false}}>
+          {props => <EditNote {...props} notes={notes} setNotes={setNotes} />}
+        </Stack.Screen>
+        <Stack.Screen
+          name="Search"
+          options={{
+            headerShown: false,
+            animation: 'slide_from_bottom',
           }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+          {props => (
+            <Search
+              {...props}
+              notes={notes}
+              onFavorite={handleFavorite}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+            />
+          )}
+        </Stack.Screen>
+      </Stack.Navigator>
+      <FlashMessage position="top" />
+    </NavigationContainer>
   );
-}
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
+};
 
 export default App;
