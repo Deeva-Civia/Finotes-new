@@ -11,13 +11,13 @@ import {Header, TextInput} from '../../components/molecules';
 import {Button, Gap} from '../../components/atoms/';
 import {Profile} from '../../assets';
 import {getAuth, createUserWithEmailAndPassword} from 'firebase/auth';
-import {launchImageLibrary} from 'react-native-image-picker';
+// import {launchImageLibrary} from 'react-native-image-picker';
 import {showMessage} from 'react-native-flash-message';
 import {getDatabase, ref, set} from 'firebase/database';
 
 const SignUp = ({navigation}) => {
-  const [photo, setPhoto] = useState(Profile);
-  const [photoBased64, setPhotoBased64] = useState('');
+  // const [photo, setPhoto] = useState(Profile);
+  // const [photoBased64, setPhotoBased64] = useState('');
   const [fullName, setFullName] = useState('');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -32,8 +32,9 @@ const SignUp = ({navigation}) => {
         const user = userCredential.user;
         set(ref(db, 'users/' + user.uid), {
           fullName: fullName,
+          username: username,
           email: email,
-          photo: photoBased64,
+          // photo: photoBased64,
         });
         showMessage({
           message: 'Registration success',
@@ -49,28 +50,28 @@ const SignUp = ({navigation}) => {
       });
   };
 
-  const getImage = async () => {
-    const result = await launchImageLibrary({
-      maxHeight: 100,
-      maxWidth: 100,
-      quality: 0.5,
-      includeBase64: true,
-      mediaType: 'photo',
-    });
+  // const getImage = async () => {
+  //   const result = await launchImageLibrary({
+  //     maxHeight: 100,
+  //     maxWidth: 100,
+  //     quality: 0.5,
+  //     includeBase64: true,
+  //     mediaType: 'photo',
+  //   });
 
-    if (result.didCancel) {
-      showMessage({
-        message: 'Pilih foto dibatalkan',
-        type: 'danger',
-      });
-    } else {
-      const assets = result.assets[0];
-      const base64 = `data:${assets.type};base64, ${assets.base64}`;
-      const source = {uri: base64};
-      setPhotoBased64(base64);
-      setPhoto(source);
-    }
-  };
+  //   if (result.didCancel) {
+  //     showMessage({
+  //       message: 'Pilih foto dibatalkan',
+  //       type: 'danger',
+  //     });
+  //   } else {
+  //     const assets = result.assets[0];
+  //     const base64 = `data:${assets.type};base64, ${assets.base64}`;
+  //     const source = {uri: base64};
+  //     setPhotoBased64(base64);
+  //     setPhoto(source);
+  //   }
+  // };
 
   return (
     <View style={styles.pageContainer}>
@@ -84,12 +85,9 @@ const SignUp = ({navigation}) => {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.contentContainer}>
           <Text style={styles.title}>{'Create New\nAccount'}</Text>
-          <TouchableOpacity
-            activeOpacity={0.5}
-            style={styles.imageWrapper}
-            onPress={getImage}>
+          <TouchableOpacity activeOpacity={0.5} style={styles.imageWrapper}>
             <View style={styles.profileCircle}>
-              <Image source={photo} style={styles.avatar} />
+              <Profile />
             </View>
           </TouchableOpacity>
           <TextInput

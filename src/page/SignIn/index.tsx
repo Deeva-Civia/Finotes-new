@@ -1,9 +1,29 @@
+import React, {useEffect, useState} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
-import React, {useEffect} from 'react';
 import {Header, TextInput} from '../../components/molecules';
 import {Button, Gap} from '../../components/atoms/';
+import {getAuth, signInWithEmailAndPassword} from 'firebase/auth';
+import {showMessage} from 'react-native-flash-message';
 
 const SignIn = ({navigation}) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const onSubmit = () => {
+    const auth = getAuth();
+    signInWithEmailAndPassword(auth, email, password)
+      .then(userCredential => {
+        // Signed in
+        const user = userCredential.user;
+        navigation.navigate('Home', {uid: user.uid});
+      })
+      .catch(error => {
+        showMessage({
+          message: error.message,
+          type: 'danger',
+        });
+      });
+  };
   return (
     <View style={styles.pageContainer}>
       <Header
@@ -17,14 +37,16 @@ const SignIn = ({navigation}) => {
         <Text style={styles.title}>{'Sign In To Your\nAccount'}</Text>
         <Gap height={100} />
         <TextInput
-          label="Username / Email Address"
-          placeholder="Enter your username"
+          label="Email Address"
+          placeholder="Enter your Email"
+          onChangeText={e => setEmail(e)}
         />
         <Gap height={14} />
         <TextInput
           label="Password"
           placeholder="Enter your password"
           secureTextEntry
+          onChangeText={e => setPassword(e)}
         />
         <Gap height={25} />
         <View style={styles.buttonWrapper}>
@@ -33,7 +55,7 @@ const SignIn = ({navigation}) => {
             bgColor="#10266F"
             color="#FFFFFF"
             borderColor="#10266F"
-            onPress={() => navigation.navigate('Home')}
+            onPress={onSubmit}
           />
           <Gap height={15} />
           <Button
