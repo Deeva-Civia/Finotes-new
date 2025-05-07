@@ -8,7 +8,7 @@ import Star from './star.svg';
 import StarFilledWhite from './star_filled_white.svg';
 import StarFilledBlue from './star_filled_blue.svg';
 import Add from './plus.svg';
-import AddPhoto from './Add_photo.svg';
+import AddPhoto from './addPhoto.png';
 import ButtonDrop from './Button_Drop.svg';
 import Profile from './Profile.png';
 
