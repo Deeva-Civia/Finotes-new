@@ -43,7 +43,7 @@ const AddNote = ({navigation, notes, setNotes}) => {
       category: selectedCategory,
       createdAt: timestamp,
       updatedAt: timestamp,
-      favorited: false,
+      favorited: false, // Pastikan ini ada
     };
 
     try {

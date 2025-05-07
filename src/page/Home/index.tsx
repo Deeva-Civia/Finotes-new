@@ -4,44 +4,62 @@ import {Gap, Quotes, AddButton} from '../../components/atoms';
 import {Header, Category, NotesList} from '../../components/molecules';
 import {SearchIcon} from '../../assets';
 import {getDatabase, ref, onValue} from 'firebase/database';
-import {collection, onSnapshot} from 'firebase/firestore';
+import {collection, onSnapshot, doc, updateDoc} from 'firebase/firestore';
 import {firestore} from '../../config/Firebase';
 
-const Home = ({uid, onFavorite, handleAddNote, navigation, route}) => {
+const Home = ({uid, navigation}) => {
   const [fullName, setFullName] = useState('');
-  // const [photo, setPhoto] = useState(NullPhoto);
-
   const [activeCategory, setActiveCategory] = useState('All');
   const [notes, setNotes] = useState([]);
 
-  const allNotes = [...notes].sort((a, b) => b.createdAt - a.createdAt);
-  const filteredNotes = allNotes.filter(note => {
+  useEffect(() => {
+    const db = getDatabase();
+    const userRef = ref(db, `users/${uid}`);
+
+    const unsubscribe = onValue(
+      userRef,
+      snapshot => {
+        const data = snapshot.val();
+        if (data && data.fullName) {
+          setFullName(data.fullName);
+        } else {
+          console.log('Full name not found in Realtime Database.');
+        }
+      },
+      error => {
+        console.error('Error fetching user data: ', error);
+      },
+    );
+
+    return () => unsubscribe();
+  }, [uid]);
+
+  const handleFavorite = async id => {
+    try {
+      const noteToUpdate = notes.find(note => note.id === id);
+      if (!noteToUpdate) {
+        return;
+      }
+
+      const noteRef = doc(firestore, 'notes', id);
+      await updateDoc(noteRef, {
+        favorited: !noteToUpdate.favorited,
+      });
+      // Local state akan diupdate otomatis melalui onSnapshot
+    } catch (error) {
+      console.error('Error updating favorite status:', error);
+    }
+  };
+
+  const filteredNotes = notes.filter(note => {
     if (activeCategory === 'All') {
       return true;
     }
     if (activeCategory === 'Favorite') {
-      return note.favorited;
+      return note.favorited === true;
     }
     return note.category === activeCategory;
   });
-
-  const handleFavorite = async id => {
-    const noteToUpdate = notes.find(note => note.id === id);
-    const updatedNote = {...noteToUpdate, favorited: !noteToUpdate.favorited};
-
-    // Update the note in Firestore
-    const noteRef = doc(firestore, 'notes', id);
-    try {
-      await updateDoc(noteRef, updatedNote);
-      // Update local state after Firestore update
-      const updatedNotes = notes.map(note =>
-        note.id === id ? updatedNote : note,
-      );
-      setNotes(updatedNotes);
-    } catch (error) {
-      console.error('Error updating note favorite status: ', error);
-    }
-  };
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -89,7 +107,7 @@ const Home = ({uid, onFavorite, handleAddNote, navigation, route}) => {
         <Gap height={19} />
         <NotesList
           notes={filteredNotes}
-          onFavorite={onFavorite}
+          onFavorite={handleFavorite}
           text={
             '\t\t\t\t\tNo notes available\nStart by creating your first one!'
           }
