@@ -1,5 +1,4 @@
 import BackLogo from './Arrow.svg';
-import Profile from './Profile.svg';
 import UserImage from './user.jpg';
 import BgQuote from './bg_quote.jpg';
 import Lamp from './Lamp.svg';
@@ -11,6 +10,7 @@ import StarFilledBlue from './star_filled_blue.svg';
 import Add from './plus.svg';
 import AddPhoto from './Add_photo.svg';
 import ButtonDrop from './Button_Drop.svg';
+import Profile from './Profile.png';
 
 export {
   BackLogo,
@@ -23,7 +23,7 @@ export {
   StarFilledWhite,
   StarFilledBlue,
   Add,
-  Profile,
   AddPhoto,
   ButtonDrop,
+  Profile,
 };
